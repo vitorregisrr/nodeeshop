@@ -16,12 +16,20 @@ class Product {
         this.img = form.img;
         this.price = form.price;
         this.desc = form.desc;
-        this.id = Math.random(0, 100);
+        this.id = form.id ? form.id : Math.random(0, 100);
     }
 
     save() {
         getProdsByFile((prods) => {
             prods.push(this);
+            fs.writeFile(prodData, JSON.stringify(prods), err => {});
+        });
+    }
+
+    edit(){
+        getProdsByFile((prods) => {
+            const oldProdIndex = prods.findIndex( item => item.id == this.id);
+            prods[oldProdIndex] = this;
             fs.writeFile(prodData, JSON.stringify(prods), err => {});
         });
     }

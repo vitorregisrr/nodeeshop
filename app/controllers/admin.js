@@ -22,11 +22,29 @@ exports.addProduct = (req, res, next) => {
 };
 
 exports.getEditProduct = (req, res, next) => {
-    res.render('admin/edit-product', {
-        pageTitle: "Edit Product",
-        path: "admin/edit-product",
+    const prodID = req.params.prodID;
+    Product.getProd(prodID, (prod) => {
+        res.render('admin/edit-product', {
+            pageTitle: "Editar Produto",
+            path: "/edit-product",
+            prod: prod
+        });
     });
 };
+
+
+exports.postEditProduct = (req, res, next) => {
+    const form = {
+        title: req.body.title,
+        img: req.body.img,
+        desc: req.body.desc,
+        price: req.body.price,
+        id: req.body.id
+    }
+    const prod = new Product(form);
+    prod.edit();
+    res.redirect('/admin/products-list')
+}
 
 exports.getProductList = (req, res, next) => {
     Product.fetchAll(prods => {
