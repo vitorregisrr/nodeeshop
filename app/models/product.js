@@ -1,50 +1,81 @@
-const fs = require('fs');
-const rootPath = require('../util/path');
-const path = require('path');
-const prodData = path.join(rootPath, 'app', 'data', 'products.json');
-
-const getProdsByFile = (cb) => {
-    fs.readFile(prodData, (err, fileContent) => {
-        let prods = !err ? JSON.parse(fileContent) : [];
-        cb(prods);
-    });
-};
+const mongodb = require('mongodb');
+const getDB = require('../util/db').getDB;
 
 class Product {
     constructor(form) {
         this.title = form.title;
-        this.img = form.img;
         this.price = form.price;
         this.desc = form.desc;
-        this.id = form.id ? form.id : Math.random(0, 100);
+        this.img = form.img;
+        this.userId = form.userId;
+        if (form.id) {
+            this._id = new mongodb.ObjectId(form.id);
+        }
     }
 
     save() {
-        getProdsByFile((prods) => {
-            prods.push(this);
-            fs.writeFile(prodData, JSON.stringify(prods), err => {});
-        });
+        return getDB()
+            .collection('products')
+            .insertOne(this)
+            .then(resul => {
+                return resul;
+            })
+            .catch(err => {
+                console.log(err);
+            })
     }
 
-    edit(){
-        getProdsByFile((prods) => {
-            const oldProdIndex = prods.findIndex( item => item.id == this.id);
-            prods[oldProdIndex] = this;
-            fs.writeFile(prodData, JSON.stringify(prods), err => {});
-        });
+    update() {
+        return getDB()
+            .collection('products')
+            .updateOne({
+                _id: new mongodb.ObjectId(this._id)
+            }, {
+                $set: this
+            })
+            .then(resul => {
+                return resul;
+            })
+            .catch(err => {
+                console.log(err);
+            })
     }
 
-    static fetchAll(cb) {
-        getProdsByFile((prods) => {
-            cb(prods);
-        });
+    static fetchAll() {
+
+        return getDB()
+            .collection('products')
+            .find()
+            .toArray()
+            .then(prods => {
+                return prods;
+            })
+            .catch(err => console.log(err));
     }
 
-    static getProd(id, cb){
-        getProdsByFile((prods) => {
-            let prod = prods.find( item => item.id == id);
-            cb(prod);
-        });
+    static getById(id) {
+        return getDB()
+            .collection('products')
+            .find({
+                _id: new mongodb.ObjectId(id)
+            })
+            .next()
+            .then(prod => {
+                return prod;
+            })
+            .catch(err => console.log(err));
+    }
+
+    static deleteById(id) {
+        return getDB()
+            .collection('products')
+            .deleteOne({
+                _id: new mongodb.ObjectId(id)
+            })
+            .then(prod => {
+                return prod;
+            })
+            .catch(err => console.log(err));
     }
 }
 

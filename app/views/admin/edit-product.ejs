@@ -17,13 +17,13 @@
         </div>
         <div class="form-control">
             <label for="price">Price</label>
-            <input type="number" name="price" id="price" value="<%= prod.price %>">
+            <input type="number" name="price" id="price" step=".01" value="<%= prod.price %>">
         </div>
         <div class="form-control">
             <label for="img">Image</label>
             <input type="text" name="img" id="img" value="<%= prod.img %>">
         </div>
-        <input type="hidden" name="id" value="<%= prod.id %>">
+        <input type="hidden" name="id" value="<%= prod._id %>">
         <button class="btn" type="submit">Send Changes</button>
     </form>
 </main>
