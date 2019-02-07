@@ -1,54 +1,46 @@
-<div class="backdrop"></div>
-<header class="main-header">
-    <button id="side-menu-toggle">Menu</button>
-    <nav class="main-header__nav">
-        <ul class="main-header__item-list">
-            <li class="main-header__item">
-                <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === 'admin/new-product' ? 'active' : '' %>" href="/admin/new-product">Add Product
-                </a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === 'admin/products-list' ? 'active' : '' %>" href="/admin/products-list">Admin
-                    Products
-                </a>
-            </li>
-        </ul>
-    </nav>
-</header>
-
-<nav class="mobile-nav">
-    <ul class="mobile-nav__item-list">
-        <li class="mobile-nav__item">
-            <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
-        </li>
-        <li class="mobile-nav__item">
-            <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
-        </li>
-        <li class="mobile-nav__item">
-            <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
-        </li>
-        <li class="mobile-nav__item">
-            <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
-        </li>
-        <li class="mobile-nav__item">
-            <a class="<%= path === 'admin/new-product' ? 'active' : '' %>" href="/admin/new-product">Add Product
-            </a>
-        </li>
-        <li class="mobile-nav__item">
-            <a class="<%= path === 'admin/products-list' ? 'active' : '' %>" href="/admin/products-list">Admin Products
-            </a>
-        </li>
-    </ul>
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand font-weight-bold text-uppercase font-italic" href="#">NodeShop</a>
+        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav mr-auto mt-2">
+                <li class="nav-item <%= path === '/' ? 'active' : '' %>">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item <%= path === '/products' ? 'active' : '' %>">
+                    <a class="nav-link" href="/products">Products</a>
+                </li>
+                <% if(isLogged){ %>
+                <li class="nav-item <%= path === '/cart' ? 'active' : '' %>">
+                    <a class="nav-link" href="/cart">Cart</a>
+                </li>
+                <li class="nav-item <%= path === '/orders' ? 'active' : '' %>">
+                    <a class="nav-link" href="/orders">Orders</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        Admin
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="nav-link" href="/admin/new-product" style="color: black"> Add Product</a>
+                        <a class="nav-link" href="/admin/products-list" style="color: black">Admin Products</a>
+                    </div>
+                </li>
+                <% } %>
+            </ul>
+            <% if(!isLogged){ %>
+            <button class="btn mr-3" type="button" data-toggle="modal" data-target="#modalLogin">Login</button>
+            <a class="btn" role="button" href="/signup">Signup</a>
+            <% }else{ %>
+            <a href="#" class="mr-3"> <%= isLogged.name %> </a > 
+            <form action="/logout" method="POST">
+                <button class="btn" type="submit">Logout</button>
+            </form>
+            <% } %>
+        </div>
+    </div>
 </nav>
