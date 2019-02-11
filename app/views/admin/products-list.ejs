@@ -26,8 +26,9 @@
                      <div class="d-flex justify-content-center align-items-center">
                      <a class="btn" href="/admin/edit-product/<%= prod._id %>">Edit</a>
                      <form action="/admin/delete-product" method="POST">
+                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                          <input type="hidden" name="id" value="<%= prod._id %>">
-                         <button class="btn" type="submit" >Delete</button>
+                         <button class="btn btn-danger" type="submit" >Delete</button>
                      </form>
                  </div>
                  </div>

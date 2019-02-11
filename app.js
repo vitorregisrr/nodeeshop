@@ -4,13 +4,18 @@ const bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
     session = require('express-session'),
     MongoDBStore = require('connect-mongodb-session')(session);
-path = require('path'),
+    path = require('path'),
     express = require('express'),
     app = express(),
+    csurf = require('csurf'),
+    flash = require('connect-flash')
     MONGO_URI = 'mongodb+srv://vitorregis:santovitor123@nodeshop-wmkec.mongodb.net/shop';
 
 app.set('view engine', 'ejs');
 app.set('views', 'app/views');
+
+//protecting from csurf ataccks
+const csrfProtection = csurf();
 
 //setting mongodb session 
 const storeSession = new MongoDBStore({
@@ -32,13 +37,10 @@ app.use(expressSession({
     saveUninitialized: false,
     store: storeSession
 }));
+app.use(csrfProtection);
+app.use(flash());
 
-//routing files
-const adminRoutes = require('./app/routes/admin');
-const shopRoutes = require('./app/routes/shop');
-const authRoutes = require('./app/routes/auth');
-const errorRoutes = require('./app/controllers/error');
-
+//checkng auth
 app.use((req, res, next) => {
     if (req.session.user) {
         User.findById(req.session.user)
@@ -46,18 +48,33 @@ app.use((req, res, next) => {
                 req.user = user;
                 next();
             })
-            .catch(err => console.log(err));
+            .catch(err => errorRoutes.get500(err, req, res, next) );
     } else {
         req.user = null;
         next();
     }
+    console.log(req.user)
 });
+
+// setting data for all views
+app.use( (req, res, next) => {
+    res.locals.isLogged = req.user ? {name: req.user.name}  : null;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
+
+//routing files
+const adminRoutes = require('./app/routes/admin');
+const shopRoutes = require('./app/routes/shop');
+const authRoutes = require('./app/routes/auth');
+const errorRoutes = require('./app/controllers/error');
 
 app.use(express.static(path.join(__dirname, 'app/public')));
 app.use(adminRoutes);
 app.use(authRoutes);
 app.use(shopRoutes);
 app.use(errorRoutes.get404);
+app.use(errorRoutes.get500);
 
 //starting server
 mongoose.connect(MONGO_URI, {

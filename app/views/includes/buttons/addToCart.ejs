@@ -1,0 +1,7 @@
+<% if(isLogged){ %>
+<form action="/cart/new" method="POST">
+    <input type="hidden" name="prodID" value="<%= prod._id %>">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <button class="btn" type="submit">Add to Cart</button>
+</form>
+<% } %>

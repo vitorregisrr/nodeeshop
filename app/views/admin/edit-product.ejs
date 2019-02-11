@@ -4,9 +4,10 @@
 </head>
 
 <body>
-    <%- include('../includes/nav.ejs', {isAdmin: isAdmin}) %>
+    <%- include('../includes/nav.ejs') %>
     <main>
         <div class="container">
+            <%- include('../includes/forms/errorBox') %>
             <form action="/admin/edit-product" method="POST">
                 <div class="form-group">
                     <label for="title">Title</label>
@@ -24,7 +25,8 @@
                     <label for="img">Image</label>
                     <input type="text" class="form-control" name="imgUrl" id="img" value="<%= prod.img %>">
                 </div>
-                <input type="hidden" name="id" value="<%= prod._id %>">
+                <input type="hidden" name="id" value="<%= prod.id %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button class="btn" type="submit">Send Changes</button>
             </form>
         </div>

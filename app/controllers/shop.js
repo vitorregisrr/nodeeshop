@@ -8,11 +8,10 @@ exports.getProducts = (req, res, next) => {
             res.render('shop/products', {
                 pageTitle: "Products List",
                 prods: prods,
-                path: "/products",
-                isLogged: req.user ? {name: req.user.name}  : false
+                path: "/products"
             });
         })
-        .catch(err => console.log(err));
+         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
 };
 
 exports.getProduct = (req, res, next) => {
@@ -22,8 +21,7 @@ exports.getProduct = (req, res, next) => {
             res.render('shop/product-detail', {
                 pageTitle: "Product Detail",
                 prod: prod,
-                path: "/products",
-                isLogged: req.user ? {name: req.user.name}  : false
+                path: "/products"
             });
         })
         .catch(err => {
@@ -37,11 +35,10 @@ exports.getIndex = (req, res, next) => {
             res.render('shop/index', {
                 pageTitle: "Início",
                 prods: prods,
-                path: "/",
-                isLogged: req.user ? {name: req.user.name}  : false
+                path: "/"
             });
         })
-        .catch(err => console.log(err));
+         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
 };
 
 
@@ -60,11 +57,10 @@ exports.getCart = (req, res, next) => {
             res.render('shop/cart', {
                 pageTitle: "Início",
                 path: "/cart",
-                prods: user.cart.items,
-                isLogged: req.user ? {name: req.user.name}  : false
+                prods: user.cart.items
             });
         })
-        .catch(err => console.log(err));
+         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
 };
 
 exports.addToCart = (req, res, next) => {
@@ -76,7 +72,7 @@ exports.addToCart = (req, res, next) => {
         .then(() => {
             res.redirect('/cart');
         })
-        .catch(err => console.log(err));
+         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
 };
 
 exports.removeFromCart = (req, res, next) => {
@@ -85,7 +81,7 @@ exports.removeFromCart = (req, res, next) => {
         .then(resul => {
             res.redirect('/cart')
         })
-        .catch(err => console.log(err));
+         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
 }
 
 exports.getOrders = (req, res, next) => {
@@ -95,11 +91,10 @@ exports.getOrders = (req, res, next) => {
             res.render('shop/orders', {
                 pageTitle: "My Orders",
                 path: "/orders",
-                orders: orders,
-                isLogged: req.user ? {name: req.user.name}  : false
+                orders: orders
             });
         })
-        .catch(err => console.log(err));
+         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
 };
 
 exports.newOrder = (req, res, next) => {
@@ -110,5 +105,5 @@ exports.newOrder = (req, res, next) => {
         .then(() => {
             res.redirect('/orders');
         })
-        .catch(err => console.log(err));
+         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
 }

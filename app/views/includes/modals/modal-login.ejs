@@ -1,0 +1,38 @@
+<% if( path != '/login') { %>
+<!-- login modal -->
+<div class="modal fade" id="modalLogin" tabindex="-1" role="dialog" aria-labelledby="Janela de Login" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Login</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <form action="/login" method="POST">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="text" class="form-control" id="email" name="email">
+              <small class="form-text text-muted">
+              <a href="/resetpassword">
+                Esqueci minha senha!
+              </a>
+              </small>
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="text" class="form-control" id="password" name="password"></div>
+        </div>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>

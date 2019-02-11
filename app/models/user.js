@@ -22,6 +22,8 @@ const User = new Schema({
             }
         }],
     },
+    resetToken: String,
+    resetTokenExpiration: Date,
     password: {
         type: String,
         required: true

@@ -34,10 +34,11 @@
             </ul>
             <% if(!isLogged){ %>
             <button class="btn mr-3" type="button" data-toggle="modal" data-target="#modalLogin">Login</button>
-            <a class="btn" role="button" href="/signup">Signup</a>
+            <a class="btn btn-primary" role="button" href="/signup">Signup</a>
             <% }else{ %>
             <a href="#" class="mr-3"> <%= isLogged.name %> </a > 
             <form action="/logout" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button class="btn" type="submit">Logout</button>
             </form>
             <% } %>

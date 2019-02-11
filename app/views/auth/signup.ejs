@@ -1,0 +1,36 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="../css/forms.css">
+</head>
+
+<body>
+    <%- include('../includes/nav.ejs') %>
+    <main>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <%- include('../includes/forms/errorBox') %>
+                    <form action="/signup" method="POST" class="mt-2">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input class="form-control" type="text" name="name" id="name" value="<%= form ? form.values.name : ''%>">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input class="form-control" type="email" name="email" id="email" value="<%= form ? form.values.email : ''%>" />
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input class="form-control" type="password" step=".01" name="password" id="password" value="<%= form ? form.values.password : ''%>">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmpassword">Confirm password</label>
+                            <input class="form-control" type="password" step=".01" name="confirmpassword" id="confirmpassword" value="<%= form ? form.values.confirmpassword : ''%>">
+                        </div>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn btn-success float-right" type="submit">Create Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <%- include('../includes/end.ejs') %>
