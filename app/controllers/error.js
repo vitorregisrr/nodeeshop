@@ -9,6 +9,6 @@ exports.get500 = (error, req, res, next) => {
     res.status(500).render('shop/500', {
         pageTitle: 'Error 500 - Server Error',
         path: '/500',
-        error: error,
+        error: error
     });
 };

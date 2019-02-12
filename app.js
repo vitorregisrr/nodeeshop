@@ -8,7 +8,8 @@ const bodyParser = require('body-parser'),
     express = require('express'),
     app = express(),
     csurf = require('csurf'),
-    flash = require('connect-flash')
+    flash = require('connect-flash'),
+    multer = require('multer'),
     MONGO_URI = 'mongodb+srv://vitorregis:santovitor123@nodeshop-wmkec.mongodb.net/shop';
 
 app.set('view engine', 'ejs');
@@ -30,6 +31,7 @@ const User = require('./app/models/user');
 app.use(bodyParser.urlencoded({
     extended: false
 }));
+app.use(multer({dest: 'images'}).single('image'));
 app.use(cookieParser());
 app.use(expressSession({
     secret: ' Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit recusandae maxime neque, aperiam laborum eum sequi at ducimus eius beatae ipsam iure delectus maiores illo quaerat numquam rerum quae nulla. ',
@@ -39,6 +41,7 @@ app.use(expressSession({
 }));
 app.use(csrfProtection);
 app.use(flash());
+
 
 //checkng auth
 app.use((req, res, next) => {
@@ -53,7 +56,6 @@ app.use((req, res, next) => {
         req.user = null;
         next();
     }
-    console.log(req.user)
 });
 
 // setting data for all views

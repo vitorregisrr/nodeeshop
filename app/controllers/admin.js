@@ -10,14 +10,14 @@ exports.getAddProduct = (req, res, next) => {
 
 //POST
 exports.addProduct = (req, res, next) => {
+    console.log(req.file)
     const form = {
         title: req.body.title,
-        imgUrl: req.body.imgUrl,
+        imgUrl: req.body.image,
         description: req.body.description,
         price: req.body.price,
         userId: req.user,
     }
-    console.log(form)
     new Product({
             ...form
         })
@@ -52,7 +52,7 @@ exports.getEditProduct = (req, res, next) => {
 exports.postEditProduct = (req, res, next) => {
     const form = {
         title: req.body.title,
-        imgUrl: req.body.imgUrl,
+        image: req.file,
         description: req.body.description,
         price: req.body.price,
         id: req.body.id

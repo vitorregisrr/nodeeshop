@@ -1,8 +1,4 @@
-const {
-    check,
-    body,
-    validationResult
-} = require('express-validator/check'),
+const { check, body, validationResult } = require('express-validator/check'),
     User = require('../models/user'),
     Product = require('../models/product')
 
