@@ -15,7 +15,7 @@ exports.signup = [
                 })
                 .then(user => {
                     if (user) {
-                        return Promise.reject('Please enter a valid e-mail');
+                        return Promise.reject('Email already in use.');
                     }
                 })
         })
@@ -163,7 +163,14 @@ exports.product = [
         .trim()
         .toFloat(),
 
-        body('img', 'A imagem deve ser uma URL')
+        body('img', 'The image is invalid, please enter a valid image!')
+        .custom( (value, { req } ) => {
+            if( !req.file ){
+                throw new Error('The image is invalid, please enter a jpg, jpeg or png image type!')
+            }
+
+            return true;
+        })
         .trim()
     ],
 
@@ -205,17 +212,13 @@ exports.editProduct = [
         .isLength({
             max: 400,
             min: 20
-        }),
-
-        body('img', 'A imagem deve ser uma URL')
-        .trim()
+        })
     ],
 
     //Calback Function
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log(req.body)
             return res
                 .status(422)
                 .render('admin/edit-product', {

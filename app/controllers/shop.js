@@ -1,6 +1,9 @@
-const Product = require('../models/product');
-const User = require('../models/user');
-const Order = require('../models/order');
+Product = require('../models/product'),
+    User = require('../models/user'),
+    Order = require('../models/order'),
+    fs = require('fs'),
+    path = require('path'),
+    Pdf = require('pdfkit');
 
 exports.getProducts = (req, res, next) => {
     Product.find()
@@ -11,7 +14,7 @@ exports.getProducts = (req, res, next) => {
                 path: "/products"
             });
         })
-         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
+        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
 };
 
 exports.getProduct = (req, res, next) => {
@@ -38,7 +41,7 @@ exports.getIndex = (req, res, next) => {
                 path: "/"
             });
         })
-         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
+        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
 };
 
 
@@ -46,7 +49,9 @@ exports.getCheckout = (req, res, next) => {
     res.render('shop/checkout', {
         pageTitle: "Início",
         path: "/checkout",
-        isLogged: req.user ? {name: req.user.name} : false
+        isLogged: req.user ? {
+            name: req.user.name
+        } : false
     });
 };
 
@@ -60,7 +65,7 @@ exports.getCart = (req, res, next) => {
                 prods: user.cart.items
             });
         })
-         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
+        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
 };
 
 exports.addToCart = (req, res, next) => {
@@ -72,7 +77,7 @@ exports.addToCart = (req, res, next) => {
         .then(() => {
             res.redirect('/cart');
         })
-         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
+        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
 };
 
 exports.removeFromCart = (req, res, next) => {
@@ -81,11 +86,13 @@ exports.removeFromCart = (req, res, next) => {
         .then(resul => {
             res.redirect('/cart')
         })
-         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
+        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
 }
 
 exports.getOrders = (req, res, next) => {
-    Order.find( {user: req.user})
+    Order.find({
+            user: req.user
+        })
         .populate('items.productId')
         .then(orders => {
             res.render('shop/orders', {
@@ -94,16 +101,61 @@ exports.getOrders = (req, res, next) => {
                 orders: orders
             });
         })
-         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
+        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
 };
 
 exports.newOrder = (req, res, next) => {
     req.user.newOrder()
-        .then( () => {
+        .then(() => {
             req.user.clearCart();
         })
         .then(() => {
             res.redirect('/orders');
         })
-         .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
+        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
 }
+
+exports.getInvoice = (req, res, next) => {
+    const orderId = req.params.orderId;
+    const invoiceName = `invoice-${orderId}.pdf`;
+    const invoicePath = path.join('app', 'data', 'invoices', invoiceName);
+    Order.findById(orderId)
+
+    .populate('items.productId')
+    .then( order => {
+        if(!order){
+           return next( new Error('Order not founded. Please back and try again.'));
+        
+        }
+
+        if (order.user.toString() == req.user._id.toString() ){
+
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+
+            const pdfDoc = new Pdf();
+            pdfDoc.pipe(fs.createWriteStream(invoicePath));
+            pdfDoc.pipe(res);
+            pdfDoc.fontSize(22).text(`Invoice ${orderId}`);
+            pdfDoc.text('------------');
+            pdfDoc.fontSize(15);
+            let totalPrice = 0;
+            order.items.forEach( (p, i) => {
+                totalPrice += p.productId.price * p.quantity;
+                pdfDoc.text(`${i+1}. ${p.productId.title} - Price: ${p.productId.price}$ - Quantity: ${p.quantity}`)
+                pdfDoc.text(`---------`);
+            })
+            pdfDoc.text(`---------`);
+            pdfDoc.text(`Total Price: ${totalPrice}$`);
+            return pdfDoc.end();
+
+        }
+
+        else{
+            return next( new Error('You are not allowed to request this invoce. Please, try again or contact us.'));
+        }
+        
+    })
+    .catch(err => next(err));
+
+}   

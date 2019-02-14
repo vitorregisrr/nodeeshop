@@ -1,4 +1,5 @@
-const Product = require('../models/product');
+const Product = require('../models/product'),
+    fs = require('fs');
 //GET
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/new-product', {
@@ -10,10 +11,9 @@ exports.getAddProduct = (req, res, next) => {
 
 //POST
 exports.addProduct = (req, res, next) => {
-    console.log(req.file)
     const form = {
         title: req.body.title,
-        imgUrl: req.body.image,
+        imageUrl: req.file.path.replace(/app\Dpublic\D/, ''),
         description: req.body.description,
         price: req.body.price,
         userId: req.user,
@@ -25,7 +25,7 @@ exports.addProduct = (req, res, next) => {
         .then(resul => {
             res.redirect('/products');
         })
-        .catch(err => next( new Error('Auth failed by a server-side error. Please, try again.', 500) ));
+        .catch(err => next(new Error('Auth failed by a server-side error. Please, try again.', 500)));
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -45,18 +45,18 @@ exports.getEditProduct = (req, res, next) => {
                 errorMessage: []
             })
         })
-        .catch(err => next( new Error('Auth failed by a server-side error. Please, try again.', 500) ));
+        .catch(err => next(new Error('Auth failed by a server-side error. Please, try again.', 500)));
 };
 
 
 exports.postEditProduct = (req, res, next) => {
     const form = {
         title: req.body.title,
-        image: req.file,
         description: req.body.description,
         price: req.body.price,
         id: req.body.id
     }
+
     Product.findOne({
             _id: form.id,
             userId: req.user
@@ -64,19 +64,28 @@ exports.postEditProduct = (req, res, next) => {
         .then(prod => {
 
             if (!prod) {
-                return res.redirect('/admin/products-list')
+                return next( new Error('Product not founded, try again or contact us.'));
             }
 
             prod.title = form.title;
-            prod.imgUrl = form.imgUrl;
             prod.description = form.description;
             prod.price = form.price;
-            return prod.save();
+
+            if (req.file) {
+                if (prod.imageUrl) {
+                    fs.unlink(`app/public/${prod.imageUrl}`, err => {
+                        if (err) {
+                            throw (err);
+                        }
+                    });
+                }
+                prod.imageUrl = req.file.path.replace(/app\Dpublic\D/, '');
+            }
+
+            prod.save();
+            return res.redirect('/products');
         })
-        .then(resul => {
-            res.redirect('/products')
-        })
-        .catch(err => next( new Error('Auth failed by a server-side error. Please, try again.', 500) ));
+        .catch(err => next(err));
 
 }
 
@@ -90,9 +99,17 @@ exports.deleteProduct = (req, res, next) => {
             if (!prod) {
                 return res.redirect('/admin/products-list')
             }
+            if (prod.imageUrl) {
+                fs.unlink(`app/public/${prod.imageUrl}`, err => {
+                    if (err) {
+                        throw (err);
+                    }
+                });
+            }
+
             return res.redirect('/admin/products-list')
         })
-        .catch(err => next( new Error('Auth failed by a server-side error. Please, try again.', 500) ));
+        .catch(err => next(new Error('Auth failed by a server-side error. Please, try again.', 500)));
 };
 
 exports.getProductList = (req, res, next) => {
@@ -106,5 +123,5 @@ exports.getProductList = (req, res, next) => {
                 path: "admin/products-list"
             });
         })
-        .catch(err => next( new Error('Auth failed by a server-side error. Please, try again.', 500) ));
+        .catch(err => next(new Error('Auth failed by a server-side error. Please, try again.', 500)));
 };

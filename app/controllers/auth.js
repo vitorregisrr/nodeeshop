@@ -1,7 +1,7 @@
 const User = require('../models/user'),
     bcrypt = require('bcryptjs'),
     crypto = require('crypto'),
-    transporter = require('../util/email-transporter');
+    transporter = require('../util/email-transporter')();
 
 exports.getLogin = (req, res, next) => {
     if (!req.user) {
@@ -162,11 +162,12 @@ exports.postResetPassword = (req, res, next) => {
                     <h3> You requested a password reset! </h3>
                     <p>Clique <a href="http://localhost:3000/newpassword/${user.resetToken}">here</a> to reset your password!</a></p>
                 `
-                });
+                })
+                .catch( err => next(err))
 
                 return res.redirect('/');
             })
-            .catch(err => next( new Error('Request failed by a server-side error. Please, try again.', err, 500) ));
+            .catch(err => next( new Error(err, 500) ));
     })
 }
 

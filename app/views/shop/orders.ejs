@@ -15,6 +15,7 @@
                     <div class="card mt-3">
                         <h5 class="card-header">ID:
                             <%= order._id %>
+                            <small><a href="orders/getInvoice/<%= order._id %>"> get invoice <a></small>
                         </h5>
                         <div class="card-body">
                             <% order.items.forEach(product => { %>
