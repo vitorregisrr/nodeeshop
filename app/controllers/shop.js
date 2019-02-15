@@ -1,20 +1,38 @@
-Product = require('../models/product'),
+const Product = require('../models/product'),
     User = require('../models/user'),
     Order = require('../models/order'),
     fs = require('fs'),
     path = require('path'),
     Pdf = require('pdfkit');
 
+const ITEMS_PER_PAGE = 8;
 exports.getProducts = (req, res, next) => {
+    const currentPage = req.query.page ? parseInt(req.query.page) : 1;
+    let totalItems;
+
     Product.find()
-        .then(prods => {
-            res.render('shop/products', {
-                pageTitle: "Products List",
-                prods: prods,
-                path: "/products"
-            });
+        .countDocuments()
+        .then(num => {
+            totalItems = num;
+            const totalPages = Math.ceil(totalItems/ITEMS_PER_PAGE);
+
+            Product.find()
+                .skip((currentPage - 1) * ITEMS_PER_PAGE)
+                .limit(ITEMS_PER_PAGE)
+                .then(prods => {
+                    res.render('shop/products', {
+                        pageTitle: "Products List",
+                        prods: prods,
+                        path: "/products",
+                        hasNext: currentPage < totalPages,
+                        hasPrevious: currentPage > 1,
+                        totalPages,
+                        currentPage
+                    });
+                })
+                .catch(err => next(err, 500));
         })
-        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
+        .catch(err => next(err, 500));
 };
 
 exports.getProduct = (req, res, next) => {
@@ -121,41 +139,39 @@ exports.getInvoice = (req, res, next) => {
     const invoicePath = path.join('app', 'data', 'invoices', invoiceName);
     Order.findById(orderId)
 
-    .populate('items.productId')
-    .then( order => {
-        if(!order){
-           return next( new Error('Order not founded. Please back and try again.'));
-        
-        }
+        .populate('items.productId')
+        .then(order => {
+            if (!order) {
+                return next(new Error('Order not founded. Please back and try again.'));
 
-        if (order.user.toString() == req.user._id.toString() ){
+            }
 
-            res.setHeader('Content-Type', 'application/pdf')
-            res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+            if (order.user.toString() == req.user._id.toString()) {
 
-            const pdfDoc = new Pdf();
-            pdfDoc.pipe(fs.createWriteStream(invoicePath));
-            pdfDoc.pipe(res);
-            pdfDoc.fontSize(22).text(`Invoice ${orderId}`);
-            pdfDoc.text('------------');
-            pdfDoc.fontSize(15);
-            let totalPrice = 0;
-            order.items.forEach( (p, i) => {
-                totalPrice += p.productId.price * p.quantity;
-                pdfDoc.text(`${i+1}. ${p.productId.title} - Price: ${p.productId.price}$ - Quantity: ${p.quantity}`)
+                res.setHeader('Content-Type', 'application/pdf')
+                res.setHeader('Content-Disposition', `inline; filename="${invoiceName}"`);
+
+                const pdfDoc = new Pdf();
+                pdfDoc.pipe(fs.createWriteStream(invoicePath));
+                pdfDoc.pipe(res);
+                pdfDoc.fontSize(22).text(`Invoice ${orderId}`);
+                pdfDoc.text('------------');
+                pdfDoc.fontSize(15);
+                let totalPrice = 0;
+                order.items.forEach((p, i) => {
+                    totalPrice += p.productId.price * p.quantity;
+                    pdfDoc.text(`${i+1}. ${p.productId.title} - Price: ${p.productId.price}$ - Quantity: ${p.quantity}`)
+                    pdfDoc.text(`---------`);
+                })
                 pdfDoc.text(`---------`);
-            })
-            pdfDoc.text(`---------`);
-            pdfDoc.text(`Total Price: ${totalPrice}$`);
-            return pdfDoc.end();
+                pdfDoc.text(`Total Price: ${totalPrice}$`);
+                return pdfDoc.end();
 
-        }
+            } else {
+                return next(new Error('You are not allowed to request this invoce. Please, try again or contact us.'));
+            }
 
-        else{
-            return next( new Error('You are not allowed to request this invoce. Please, try again or contact us.'));
-        }
-        
-    })
-    .catch(err => next(err));
+        })
+        .catch(err => next(err));
 
-}   
+}

@@ -7,16 +7,12 @@ const bodyParser = require('body-parser'),
     path = require('path'),
     express = require('express'),
     app = express(),
-    csurf = require('csurf'),
     flash = require('connect-flash'),
-    multer = require('multer'),
     MONGO_URI = 'mongodb+srv://vitorregisr:12345@nodeshop-wmkec.mongodb.net/shop';
 
+//seting views engine
 app.set('view engine', 'ejs');
 app.set('views', 'app/views');
-
-//protecting from csurf ataccks
-const csrfProtection = csurf();
 
 //setting mongodb session 
 const storeSession = new MongoDBStore({
@@ -24,42 +20,13 @@ const storeSession = new MongoDBStore({
     collect: 'sessions'
 });
 
-//seting db models
+//setting db models
 const User = require('./app/models/user');
 
 //seting app middlewares
 app.use(bodyParser.urlencoded({
     extended: false
 }));
-app.use(multer({
-    storage: multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, './app/public/images');
-        },
-
-        filename: (req, file, cb) => {
-            cb(null, Date.now().toString() + '-' + file.originalname);
-
-        }
-    }),
-
-    fileFilter: (req, file, cb) => {
-
-        const acceptedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
-        let accepted = false;
-        acceptedTypes.forEach(t => {
-            if (file.mimetype === t) {
-                cb(null, true);
-                accepted = true;
-            }
-        });
-
-        if( !accepted ){
-            cb(null, false);
-        }
-    }
-
-}).single('image'));
 app.use(cookieParser());
 app.use(expressSession({
     secret: ' Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit recusandae maxime neque, aperiam laborum eum sequi at ducimus eius beatae ipsam iure delectus maiores illo quaerat numquam rerum quae nulla. ',
@@ -67,9 +34,7 @@ app.use(expressSession({
     saveUninitialized: false,
     store: storeSession
 }));
-app.use(csrfProtection);
 app.use(flash());
-
 
 //checkng auth
 app.use((req, res, next) => {
@@ -84,15 +49,6 @@ app.use((req, res, next) => {
         req.user = null;
         next();
     }
-});
-
-// setting data for all views
-app.use((req, res, next) => {
-    res.locals.isLogged = req.user ? {
-        name: req.user.name
-    } : null;
-    res.locals.csrfToken = req.csrfToken();
-    next();
 });
 
 //routing files

@@ -206,3 +206,8 @@ form {
     display: none;
   }
 }
+
+.card-img-top{
+  max-height: 200px !important;
+  object-fit: cover;
+}

@@ -75,7 +75,7 @@ exports.postEditProduct = (req, res, next) => {
                 if (prod.imageUrl) {
                     fs.unlink(`app/public/${prod.imageUrl}`, err => {
                         if (err) {
-                            throw (err);
+                            console.log(err);
                         }
                     });
                 }

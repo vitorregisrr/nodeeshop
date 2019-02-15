@@ -1,6 +1,6 @@
-const User = require('../models/user'),
-    bcrypt = require('bcryptjs'),
-    crypto = require('crypto'),
+const User = require('../models/user');
+    bcrypt = require('bcryptjs');
+    crypto = require('crypto');
     transporter = require('../util/email-transporter')();
 
 exports.getLogin = (req, res, next) => {

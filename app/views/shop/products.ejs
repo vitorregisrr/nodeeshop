@@ -10,15 +10,15 @@
             <div class="row mt-5">
                 <% for(let prod of prods){ %>
                 <div class="col 12 col-md-6 col-lg-3">
-                    <div class="card">
-                        <img class="card-img-top" src="<%= prod.imageUrl %>"
-                            alt="Card image cap">
+                    <div class="card mb-3">
+                        <img class="card-img-top" src="<%= prod.imageUrl %>" alt="Card image cap">
                         <div class="card-body">
                             <h5 class="card-title">
                                 <%= prod.title %>
                             </h5>
                             <h6>
-                                Preço: <%= prod.price %>
+                                Preço:
+                                <%= prod.price %>
                             </h6>
                             <p class="card-text">
                                 <%= prod.description %>
@@ -33,8 +33,14 @@
                 <% } %>
             </div>
             <%} else { %>
-            <h1>No Products Found!</h1>
+            <div class="jumbotron jumbotron-fluid">
+                <div class="container">
+                    <h1 class="display-4">No products founded.</h1>
+                    <p class="lead">We sorry, but there is nothing to show you here.</p>
+                </div>
+            </div>
             <% } %>
+            <%- include('../includes/pagination') %>
         </div>
     </main>
     <%- include('../includes/end.ejs') %>
