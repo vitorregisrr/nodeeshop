@@ -1,5 +1,7 @@
 const Product = require('../models/product'),
     fs = require('fs');
+
+const ITEMS_PER_PAGE = 8;
 //GET
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/new-product', {
@@ -90,7 +92,7 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.deleteProduct = (req, res, next) => {
-    const prodID = req.body.id;
+    const prodID = req.params.productId;
     Product.findOneAndDelete({
             _id: prodID,
             userId: req.user
@@ -107,21 +109,42 @@ exports.deleteProduct = (req, res, next) => {
                 });
             }
 
-            return res.redirect('/admin/products-list')
+            return res.status (200).json({
+                "message": "Success"
+            });
         })
-        .catch(err => next(new Error('Auth failed by a server-side error. Please, try again.', 500)));
+        .catch(err => {
+            res.status(500).json({
+                "message": "Error",
+            });
+        });
 };
 
 exports.getProductList = (req, res, next) => {
-    Product.find({
-            userId: req.user
+    const currentPage = req.query.page ? parseInt(req.query.page) : 1;
+    let totalItems;
+
+    Product.find()
+    .countDocuments()
+    .then(num => {
+        totalItems = num;
+        const totalPages = Math.ceil(totalItems/ITEMS_PER_PAGE);
+
+        Product.find()
+            .skip((currentPage - 1) * ITEMS_PER_PAGE)
+            .limit(ITEMS_PER_PAGE)
+            .then(prods => {
+                res.render('admin/products-list', {
+                    pageTitle: "ADMIN Products List",
+                    prods: prods,
+                    path: "admin/products-list",
+                    hasNext: currentPage < totalPages,
+                    hasPrevious: currentPage > 1,
+                    totalPages,
+                    currentPage
+                });
+            })
+        .catch(err => next(new Error(err, 500)));
         })
-        .then(prods => {
-            res.render('admin/products-list', {
-                pageTitle: "Products ADMIN",
-                prods: prods,
-                path: "admin/products-list"
-            });
-        })
-        .catch(err => next(new Error('Auth failed by a server-side error. Please, try again.', 500)));
+        .catch(err => next(new Error(err, 500)));
 };

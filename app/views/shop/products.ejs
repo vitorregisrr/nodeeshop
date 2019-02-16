@@ -1,5 +1,4 @@
 <%- include('../includes/head.ejs') %>
-<link rel="stylesheet" href="../css/product.css">
 </head>
 
 <body>
@@ -11,7 +10,7 @@
                 <% for(let prod of prods){ %>
                 <div class="col 12 col-md-6 col-lg-3">
                     <div class="card mb-3">
-                        <img class="card-img-top" src="<%= prod.imageUrl %>" alt="Card image cap">
+                        <img class="card-img-top" src="<%=  prod.imageUrl %>" alt="Card image cap">
                         <div class="card-body">
                             <h5 class="card-title">
                                 <%= prod.title %>

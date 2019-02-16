@@ -1,6 +1,7 @@
 const { check, body, validationResult } = require('express-validator/check'),
     User = require('../models/user'),
-    Product = require('../models/product')
+    Product = require('../models/product'),
+    fs = require('fs');
 
 exports.signup = [
     // Express Validation
@@ -146,7 +147,8 @@ exports.login = [
 
 
 exports.product = [
-    [body('title', 'The Title must have between 10 and 60 characters.')
+    [
+        body('title', 'The Title must have between 10 and 60 characters.')
         .isLength({
             max: 60,
             min: 10
@@ -178,6 +180,13 @@ exports.product = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            if (req.file) {
+                fs.unlink(req.file.path, err => {
+                    if (err) {
+                        throw (err);
+                    }
+                });
+            }
             return res
                 .status(422)
                 .render('admin/new-product', {
@@ -187,7 +196,7 @@ exports.product = [
                     form: {
                         values: req.body,
                         hasError: errors.array().map(i => i.param)
-                    }
+                    }   
                 })
         } else {
             next();

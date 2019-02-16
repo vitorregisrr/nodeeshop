@@ -1,5 +1,6 @@
-const multer = require('multer');
-const { validationResult } = require('express-validator/check');
+const multer = require('multer'),
+    { validationResul } = require('express-validator/check');
+    fs = require('fs');
 
 module.exports = (multer({
     storage: multer.diskStorage({
@@ -14,11 +15,6 @@ module.exports = (multer({
     }),
 
     fileFilter: (req, file, cb) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            console.log(hasErrors);
-            cb(null, false);
-        }
         const acceptedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
         let accepted = false;
         acceptedTypes.forEach(t => {
@@ -28,7 +24,7 @@ module.exports = (multer({
             }
         });
 
-        if( !accepted ){
+        if (!accepted) {
             cb(null, false);
         }
     }

@@ -8,7 +8,10 @@ const bodyParser = require('body-parser'),
     express = require('express'),
     app = express(),
     flash = require('connect-flash'),
-    MONGO_URI = 'mongodb+srv://vitorregisr:12345@nodeshop-wmkec.mongodb.net/shop';
+    MONGO_URI = 'mongodb+srv://vitorregisr:12345@nodeshop-wmkec.mongodb.net/shop',
+    setLocals = require('./app/middleware/set-locals'),
+    csurfProtection = require('csurf')({cookie: true}),
+    multer = require('./app/middleware/multer');
 
 //seting views engine
 app.set('view engine', 'ejs');
@@ -35,6 +38,8 @@ app.use(expressSession({
     store: storeSession
 }));
 app.use(flash());
+app.use(multer.single('image'));
+app.use(csurfProtection);
 
 //checkng auth
 app.use((req, res, next) => {
@@ -50,6 +55,8 @@ app.use((req, res, next) => {
         next();
     }
 });
+
+app.use(setLocals);
 
 //routing files
 const adminRoutes = require('./app/routes/admin');
