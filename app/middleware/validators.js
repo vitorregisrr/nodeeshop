@@ -166,8 +166,10 @@ exports.product = [
         .toFloat(),
 
         body('img', 'The image is invalid, please enter a valid image!')
-        .custom( (value, { req } ) => {
-            if( !req.file ){
+        .custom((value, {
+            req
+        }) => {
+            if (!req.file) {
                 throw new Error('The image is invalid, please enter a jpg, jpeg or png image type!')
             }
 
@@ -196,7 +198,7 @@ exports.product = [
                     form: {
                         values: req.body,
                         hasError: errors.array().map(i => i.param)
-                    }   
+                    }
                 })
         } else {
             next();
@@ -236,9 +238,11 @@ exports.editProduct = [
                     errorMessage: errors.array(),
                     form: {
                         values: req.body,
-                        hasError: errors.array().map( i => i.param)
+                        hasError: errors.array().map(i => i.param)
                     },
-                    prod: { ...req.body }
+                    prod: {
+                        ...req.body
+                    }
                 })
         } else {
             next();

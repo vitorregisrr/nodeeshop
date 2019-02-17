@@ -1,5 +1,8 @@
 const Product = require('../models/product'),
-    fs = require('fs');
+    fileHelper = require('../util/file-helper'),
+    sharp = require('sharp');
+
+sharp.cache(false);
 
 const ITEMS_PER_PAGE = 8;
 //GET
@@ -15,19 +18,28 @@ exports.getAddProduct = (req, res, next) => {
 exports.addProduct = (req, res, next) => {
     const form = {
         title: req.body.title,
-        imageUrl: req.file.path.replace(/app\Dpublic\D/, ''),
         description: req.body.description,
         price: req.body.price,
         userId: req.user,
     }
-    new Product({
-            ...form
+
+    fileHelper.compressImage(req.file, 200)
+        .then(newPath => {
+
+            new Product({
+                    ...form,
+                    imageUrl: newPath.replace(/app\Dpublic\D/, ''),
+                })
+                .save()
+                .then(resul => {
+                    res.redirect('/products');
+                })
+                .catch(err => {
+                    fileHelper.delete(req.file.path);
+                    next(err);
+                });
         })
-        .save()
-        .then(resul => {
-            res.redirect('/products');
-        })
-        .catch(err => next(new Error('Auth failed by a server-side error. Please, try again.', 500)));
+        .catch(err => next(err));
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -66,7 +78,7 @@ exports.postEditProduct = (req, res, next) => {
         .then(prod => {
 
             if (!prod) {
-                return next( new Error('Product not founded, try again or contact us.'));
+                return next(new Error('Product not founded, try again or contact us.'));
             }
 
             prod.title = form.title;
@@ -74,18 +86,19 @@ exports.postEditProduct = (req, res, next) => {
             prod.price = form.price;
 
             if (req.file) {
-                if (prod.imageUrl) {
-                    fs.unlink(`app/public/${prod.imageUrl}`, err => {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });
-                }
-                prod.imageUrl = req.file.path.replace(/app\Dpublic\D/, '');
-            }
 
-            prod.save();
-            return res.redirect('/products');
+                if(prod.imageUrl){
+                    fileHelper.delete(`app/public/${prod.imageUrl}`)
+                }
+
+                fileHelper.compressImage(req.file, 200)
+                    .then(newPath => {
+                        prod.imageUrl = newPath.replace(/app\Dpublic\D/, '');
+                        prod.save();
+                        return res.redirect('/products');
+                    })
+                    .catch(err => next(err));
+            }
         })
         .catch(err => next(err));
 
@@ -102,14 +115,10 @@ exports.deleteProduct = (req, res, next) => {
                 return res.redirect('/admin/products-list')
             }
             if (prod.imageUrl) {
-                fs.unlink(`app/public/${prod.imageUrl}`, err => {
-                    if (err) {
-                        throw (err);
-                    }
-                });
+                fileHelper.delete(`app/public/${prod.imageUrl}`);
             }
 
-            return res.status (200).json({
+            return res.status(200).json({
                 "message": "Success"
             });
         })
@@ -125,26 +134,26 @@ exports.getProductList = (req, res, next) => {
     let totalItems;
 
     Product.find()
-    .countDocuments()
-    .then(num => {
-        totalItems = num;
-        const totalPages = Math.ceil(totalItems/ITEMS_PER_PAGE);
+        .countDocuments()
+        .then(num => {
+            totalItems = num;
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
-        Product.find()
-            .skip((currentPage - 1) * ITEMS_PER_PAGE)
-            .limit(ITEMS_PER_PAGE)
-            .then(prods => {
-                res.render('admin/products-list', {
-                    pageTitle: "ADMIN Products List",
-                    prods: prods,
-                    path: "admin/products-list",
-                    hasNext: currentPage < totalPages,
-                    hasPrevious: currentPage > 1,
-                    totalPages,
-                    currentPage
-                });
-            })
-        .catch(err => next(new Error(err, 500)));
+            Product.find()
+                .skip((currentPage - 1) * ITEMS_PER_PAGE)
+                .limit(ITEMS_PER_PAGE)
+                .then(prods => {
+                    res.render('admin/products-list', {
+                        pageTitle: "ADMIN Products List",
+                        prods: prods,
+                        path: "admin/products-list",
+                        hasNext: currentPage < totalPages,
+                        hasPrevious: currentPage > 1,
+                        totalPages,
+                        currentPage
+                    });
+                })
+                .catch(err => next(new Error(err, 500)));
         })
         .catch(err => next(new Error(err, 500)));
 };

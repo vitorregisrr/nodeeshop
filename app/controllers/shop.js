@@ -64,13 +64,7 @@ exports.getIndex = (req, res, next) => {
 
 
 exports.getCheckout = (req, res, next) => {
-    res.render('shop/checkout', {
-        pageTitle: "Início",
-        path: "/checkout",
-        isLogged: req.user ? {
-            name: req.user.name
-        } : false
-    });
+  
 };
 
 exports.getCart = (req, res, next) => {
@@ -145,7 +139,7 @@ exports.getInvoice = (req, res, next) => {
                 return next(new Error('Order not founded. Please back and try again.'));
 
             }
-
+            
             if (order.user.toString() == req.user._id.toString()) {
 
                 res.setHeader('Content-Type', 'application/pdf')
