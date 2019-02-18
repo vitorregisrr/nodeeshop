@@ -1,3 +1,4 @@
 sendgrid.env
 node_modules/
 app/util/email-transporter.js
+.vscode/

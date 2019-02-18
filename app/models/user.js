@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const Order = require('../models/order');
+const mongoose = require('mongoose'),
+    Schema = mongoose.Schema,
+    Order = require('./order'),
+    Product = require('./product');
 
 const User = new Schema({
     name: {
@@ -13,10 +14,11 @@ const User = new Schema({
     },
     cart: {
         items: [{
-            productId: {
+            product: {
                 type: Schema.Types.ObjectId,
                 ref: 'Product'
             },
+
             quantity: {
                 type: Number
             }
@@ -31,15 +33,19 @@ const User = new Schema({
 });
 
 User.methods.addToCart = function (product) {
-    const alreadyExists = this.cart.items.findIndex(item => item.productId.toString() == product._id.toString());
-    const updatedCart = { ...this.cart};
+    const alreadyExists = this.cart.items.findIndex(item => item.product.toString() == product._id.toString());
+    const updatedCart = {
+        ...this.cart
+    };
 
     if (alreadyExists != -1) {
         updatedCart.items[alreadyExists].quantity += 1;
 
     } else {
         updatedCart.items.push({
-            productId: product._id,
+            product: product._id,
+            title: product.title,
+            price: product.price,
             quantity: 1
         });
     }
@@ -48,25 +54,40 @@ User.methods.addToCart = function (product) {
     return this.save();
 }
 
-User.methods.removeFromCart = function(productId){
-    const updatedItems = this.cart.items.filter( i => i.productId.toString() != productId.toString());
+User.methods.removeFromCart = function (productId) {
+    const updatedItems = this.cart.items.filter(i => i.productId.toString() != productId.toString());
     this.cart.items = updatedItems;
     return this.save();
 }
 
-User.methods.clearCart = function(){
+User.methods.clearCart = function () {
     this.cart = {
         items: []
     }
     return this.save();
 }
 
-User.methods.newOrder = function(){
-    const order = new Order({
-        user: this._id,
-        items: this.cart.items
+User.methods.newOrder = function () {
+    const itemsPromises = this.cart.items.map(i => {
+        return Product.findById(i.product)
+            .then(prod => {
+                return item = {
+                    product: i.product,
+                    quantity: i.quantity,
+                    title: prod.title,
+                    price: prod.price
+                };
+            })
+    });
+
+    return Promise.all(itemsPromises)
+    .then( items => {
+        new Order({
+            user: this._id,
+            items: items
+        })
+        .save()
     })
-    return order.save();
 }
 
 module.exports = mongoose.model('User', User);

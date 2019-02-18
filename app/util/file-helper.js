@@ -38,7 +38,7 @@ exports.compressImage = (file, size) => {
             //create the new
             fs.writeFile(newPath, data, err => {
                 if(err){
-                    resul = err;
+                    next(err);
                 }
             });
 

@@ -3,7 +3,7 @@ const bodyParser = require('body-parser'),
     expressSession = require('express-session'),
     mongoose = require('mongoose'),
     session = require('express-session'),
-    MongoDBStore = require('connect-mongodb-session')(session);
+    mongoDBSession = require('connect-mongodb-session')(session);
     path = require('path'),
     express = require('express'),
     app = express(),
@@ -18,7 +18,7 @@ app.set('view engine', 'ejs');
 app.set('views', 'app/views');
 
 //setting mongodb session 
-const storeSession = new MongoDBStore({
+const storeSession = new mongoDBSession({
     uri: MONGO_URI,
     collect: 'sessions'
 });
@@ -32,10 +32,13 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(cookieParser());
 app.use(expressSession({
-    secret: ' Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit recusandae maxime neque, aperiam laborum eum sequi at ducimus eius beatae ipsam iure delectus maiores illo quaerat numquam rerum quae nulla. ',
+    secret: 'A vida é muito coolzástica',
     resave: false,
     saveUninitialized: false,
-    store: storeSession
+    store: storeSession,
+    cookie: {
+        maxAge: 60 * 60 * 24 * 30 * 1000
+    }
 }));
 app.use(flash());
 app.use(multer.single('image'));

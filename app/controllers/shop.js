@@ -6,6 +6,7 @@ const Product = require('../models/product'),
     Pdf = require('pdfkit');
 
 const ITEMS_PER_PAGE = 8;
+
 exports.getProducts = (req, res, next) => {
     const currentPage = req.query.page ? parseInt(req.query.page) : 1;
     let totalItems;
@@ -59,7 +60,7 @@ exports.getIndex = (req, res, next) => {
                 path: "/"
             });
         })
-        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
+        .catch(err => next(err, 500));
 };
 
 
@@ -69,7 +70,7 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
     User.findById(req.user)
-        .populate('cart.items.productId')
+        .populate('cart.items.product')
         .then(user => {
             res.render('shop/cart', {
                 pageTitle: "Início",
@@ -77,7 +78,7 @@ exports.getCart = (req, res, next) => {
                 prods: user.cart.items
             });
         })
-        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
+        .catch(err => next(err, 500));
 };
 
 exports.addToCart = (req, res, next) => {
@@ -89,7 +90,7 @@ exports.addToCart = (req, res, next) => {
         .then(() => {
             res.redirect('/cart');
         })
-        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
+        .catch(err => next(err, 500));
 };
 
 exports.removeFromCart = (req, res, next) => {
@@ -98,14 +99,13 @@ exports.removeFromCart = (req, res, next) => {
         .then(resul => {
             res.redirect('/cart')
         })
-        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
+        .catch(err => next(err, 500));
 }
 
 exports.getOrders = (req, res, next) => {
     Order.find({
             user: req.user
         })
-        .populate('items.productId')
         .then(orders => {
             res.render('shop/orders', {
                 pageTitle: "My Orders",
@@ -113,7 +113,7 @@ exports.getOrders = (req, res, next) => {
                 orders: orders
             });
         })
-        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
+        .catch(err => next(err, 500));
 };
 
 exports.newOrder = (req, res, next) => {
@@ -124,7 +124,7 @@ exports.newOrder = (req, res, next) => {
         .then(() => {
             res.redirect('/orders');
         })
-        .catch(err => next(new Error('Request failed by a server-side error. Please, try again.', err, 500)));
+        .catch(err => next(err, 500));
 }
 
 exports.getInvoice = (req, res, next) => {
@@ -132,8 +132,6 @@ exports.getInvoice = (req, res, next) => {
     const invoiceName = `invoice-${orderId}.pdf`;
     const invoicePath = path.join('app', 'data', 'invoices', invoiceName);
     Order.findById(orderId)
-
-        .populate('items.productId')
         .then(order => {
             if (!order) {
                 return next(new Error('Order not founded. Please back and try again.'));
@@ -153,8 +151,8 @@ exports.getInvoice = (req, res, next) => {
                 pdfDoc.fontSize(15);
                 let totalPrice = 0;
                 order.items.forEach((p, i) => {
-                    totalPrice += p.productId.price * p.quantity;
-                    pdfDoc.text(`${i+1}. ${p.productId.title} - Price: ${p.productId.price}$ - Quantity: ${p.quantity}`)
+                    totalPrice += p.price * p.quantity;
+                    pdfDoc.text(`${i+1}. ${p.title} - Price: ${p.price}$ - Quantity: ${p.quantity}`)
                     pdfDoc.text(`---------`);
                 })
                 pdfDoc.text(`---------`);

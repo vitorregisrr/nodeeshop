@@ -11,18 +11,19 @@
                 <% prods.forEach(p => { %>
                 <div class="col-12 col-md-3">
                     <div class="card mt-3">
-                        <h5 class="card-header">
-                            <%= p.productId.title %>
-                        </h5>
                         <div class="card-body">
+                            <h5 class="card-title">
+                                <%= p.product.title %>
+                            </h5>
                             <div>
-                                <h5 class="card-title"> <%= p.productId.description %> </h5>
-                                <p class="card-text">Quantity:
+                                <p class="card-text">
+                                    Price: R$
+                                    <%= p.product.price %>, Quantity:
                                     <%= p.quantity %>
                                 </p>
                                 <form action="/cart/delete" method="POST">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <input type="hidden" value="<%= p.productId._id %>" name="id">
+                                    <input type="hidden" value="<%= p.product%>" name="id">
                                     <button class="btn btn-danger" type="submit">Delete</button>
                                 </form>
                             </div>

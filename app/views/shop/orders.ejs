@@ -20,9 +20,10 @@
                         <div class="card-body">
                             <% order.items.forEach(product => { %>
                             <div class="d-flex justify-content-between">
-                                <h5 class="card-title"><%=  product.productId.title %></h5>
-                                <p class="card-text">Quantity:
-                                    <%= product.quantity %>
+                                <h5 class="card-title"><%=  product.title %></h5>
+                                <p class="card-text">
+                                    Price: R$<%= product.price %>,00
+                                    Quantity: <%= product.quantity %>
                                 </p>
                             </div>
                             <hr />

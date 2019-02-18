@@ -7,11 +7,22 @@ const Order = new Schema({
         required: true
     },
     items: [{
-        productId: {
+        product: {
             ref: 'Product',
             type: Schema.Types.ObjectId,
             required: true
         },
+
+        title: {
+            type: String,
+            required: true
+        },
+
+        price: {
+            type: Number,
+            required: true
+        },
+        
         quantity: {
             type: Number,
             required: true
